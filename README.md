@@ -1,1 +1,1 @@
-![](https://s33.aconvert.com/convert/p3r68-cdx67/xzinw-0s7zw.gif)
+![效果](https://github.com/Jasonono/LoadingView/blob/master/screen.gif)
