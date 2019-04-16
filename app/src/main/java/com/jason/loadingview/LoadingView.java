@@ -22,6 +22,8 @@ public class LoadingView extends RelativeLayout {
     private ObjectAnimator innerLeftAnimator;
     private ObjectAnimator outterRightAnimator1;
     private int leftColor;
+    private int rightColor;
+    private int centerColor;
     private AnimatorSet outterAnimatorSet;
     private AnimatorSet innerAnimatorSet;
 
@@ -64,17 +66,20 @@ public class LoadingView extends RelativeLayout {
         if (outterRightAnimator == null)
             outterRightAnimator = ObjectAnimator.ofFloat(mRightView, "translationX", 0,
                     mTranslationDistance);
-        outterAnimatorSet = new AnimatorSet();
-        outterAnimatorSet.cancel();
-        outterAnimatorSet.setDuration(ANIMATION_TIME);
-        outterAnimatorSet.setInterpolator(new DecelerateInterpolator(1.2f));
-        outterAnimatorSet.playTogether(outterLeftAnimator, outterRightAnimator);
-        outterAnimatorSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                innerAnimation();
-            }
-        });
+
+        if (outterAnimatorSet == null) {
+            outterAnimatorSet = new AnimatorSet();
+            outterAnimatorSet.setDuration(ANIMATION_TIME);
+            outterAnimatorSet.setInterpolator(new DecelerateInterpolator(1.2f));
+            outterAnimatorSet.playTogether(outterLeftAnimator, outterRightAnimator);
+            outterAnimatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    innerAnimation();
+                }
+            });
+        }
+
         outterAnimatorSet.start();
     }
 
@@ -85,29 +90,27 @@ public class LoadingView extends RelativeLayout {
         if (outterRightAnimator1 == null)
             outterRightAnimator1 = ObjectAnimator.ofFloat(mRightView, "translationX",
                     mTranslationDistance, 0);
+        if (innerAnimatorSet == null) {
+            innerAnimatorSet = new AnimatorSet();
+            innerAnimatorSet.setDuration(ANIMATION_TIME);
+            innerAnimatorSet.setInterpolator(new AccelerateInterpolator(1.2f));
+            innerAnimatorSet.playTogether(innerLeftAnimator, outterRightAnimator1);
+            innerAnimatorSet.addListener(new AnimatorListenerAdapter() {
 
-        innerAnimatorSet = new AnimatorSet();
-        innerAnimatorSet.setDuration(ANIMATION_TIME);
-        innerAnimatorSet.setInterpolator(new AccelerateInterpolator(1.2f));
-        innerAnimatorSet.playTogether(innerLeftAnimator, outterRightAnimator1);
-        innerAnimatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    leftColor = mLeftView.getColor();
+                    centerColor = mCenterView.getColor();
+                    rightColor = mRightView.getColor();
 
-            private int rightColor;
-            private int centerColor;
+                    mLeftView.exChangeColor(rightColor);
+                    mCenterView.exChangeColor(leftColor);
+                    mRightView.exChangeColor(centerColor);
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                leftColor = mLeftView.getColor();
-                centerColor = mCenterView.getColor();
-                rightColor = mRightView.getColor();
-
-                mLeftView.exChangeColor(rightColor);
-                mCenterView.exChangeColor(leftColor);
-                mRightView.exChangeColor(centerColor);
-
-                outterAnimation();
-            }
-        });
+                    outterAnimation();
+                }
+            });
+        }
         innerAnimatorSet.start();
     }
 
@@ -124,5 +127,13 @@ public class LoadingView extends RelativeLayout {
                 .getDisplayMetrics());
     }
 
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (GONE == visibility){
+            outterAnimatorSet.cancel();
+            innerAnimatorSet.cancel();
+        }
+
+    }
 
 }
